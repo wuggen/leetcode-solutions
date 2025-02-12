@@ -1,7 +1,7 @@
-//! 1910. Remove All Occurrences of a Substring
+//! Remove All Occurrences of a Substring
 //!
 //! Solved 2025-02-11
-//! https://leetcode.com/problems/remove-all-occurrences-of-a-substring
+//! <https://leetcode.com/problems/remove-all-occurrences-of-a-substring>
 
 pub struct Solution;
 impl Solution {

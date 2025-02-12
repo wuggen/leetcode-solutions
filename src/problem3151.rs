@@ -1,7 +1,7 @@
-//! 3151. Special Array I
+//! Special Array I
 //!
 //! Solved on 2025-01-31
-//! https://leetcode.com/problems/special-array-i/description/
+//! <https://leetcode.com/problems/special-array-i>
 
 pub struct Solution;
 impl Solution {

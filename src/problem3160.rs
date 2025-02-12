@@ -1,7 +1,7 @@
-//! 3160. Find the Number of Distinct Colors Among the Balls
+//! Find the Number of Distinct Colors Among the Balls
 //!
 //! Solved on 2025-02-06
-//! https://leetcode.com/problems/find-the-number-of-distinct-colors-among-the-balls/
+//! <https://leetcode.com/problems/find-the-number-of-distinct-colors-among-the-balls>
 
 pub struct Solution;
 impl Solution {
@@ -45,7 +45,7 @@ mod test {
 
     param_test!(test<Solution::query_results>(
         limit: i32,
-        queries: &[[i32; 2]] {
+        queries: &[[i32; 2]] => {
             queries.iter().copied().map(Vec::from).collect::<Vec<_>>()
         },
     ) -> &[i32] {

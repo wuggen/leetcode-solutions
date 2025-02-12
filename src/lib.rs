@@ -1,15 +1,22 @@
+//! Personal crate for leetcode problem solutions.
+
+/// Generate a set of parametrized test cases for a target function.
+///
 /// Usage:
 ///
-/// ```
+/// ```no_run
+/// # use leetcode::param_test;
+/// # mod path { pub mod to { pub fn target_fn(a: &[i32], b: Vec<&str>) -> i32 { loop {} } } }
 /// param_test! {
-///     // Test target signature:
+///     // Test target specification:
 ///     // - Name for the generated test driver function (can be arbitrary)
-///     // - Name (or path) of the target function
-///     // - Parameters to each test case (should match up with parameters of target function)
-///     // - Type of test case expected values (should be comparable to return value of target function)
+///     // - Name (or path) of the target function (the function under test)
+///     // - Parameters to each test case (must have the same number and order
+///     //   as parameters to the target function)
+///     // - Type of test case expected values
 ///     test_driver<path::to::target_fn>(
 ///         target_param1: &[i32],
-///         target_param2: &str {
+///         target_param2: &str => {
 ///             // Optional conversion from ParamType to the actual type expected by the target function
 ///             let split = target_param2.split_whitespace();
 ///             split.collect::<Vec<_>>()
@@ -33,36 +40,60 @@
 /// expression, making use of the parameter name, to map the test case parameter
 /// into the type expected by the target function.
 ///
-/// Each test case is executed as follows:
-/// - Evaluating the optional conversion for given parameter that has one;
-/// - Calling the target function, passing `param.into()` for each of the given
-///   parameters (or the result of their optional conversion);
-/// - Evaluating `assert_eq!` between the result, and the expected value given
-///   after the `=>` token for that case.
+/// `test_runner` can be an arbitrary identifier; it will be used as the name of
+/// the parameterized function that handles the various test cases.
 ///
-/// `test_runner` can be an arbitrary identifier, and will be used as the name of the
-/// parameterized function that handles the various test cases.
-#[cfg(test)]
+/// The expected value can also have an optional conversion, given by the
+/// following syntax:
+///
+/// ```no_run
+/// # use leetcode::param_test;
+/// # fn target_fn(a: &[i32]) -> Vec<i32> { loop {} }
+/// param_test! {
+///     test_driver<target_fn>(param: &[i32]) -> &[i32] => |expect| {
+///         Vec::from(expect)
+///     } {
+///         case1(&[45, 46, 47]) => &[18],
+///     }
+/// }
+/// ```
+///
+/// If provided, the expected value conversion will be evaluated on the expected
+/// value as specified in a test case before the result of the target function is
+/// compared to it. Note that in the above example this conversion is entirely
+/// unneccessary, since `&[i32]` can be compared in an `assert_eq!` with a
+/// `Vec<i32>` with no need for conversion.
+///
+/// Each test case is executed as follows:
+/// - Evaluate the optional conversion for each parameter that has one;
+/// - Call the target function, passing as arguments the results of calling
+///   `.into()` on each of the given parameters (or on the result of their
+///   optional conversion);
+/// - If an expected value conversion was given, evaluate it on the given
+///   expected value;
+/// - Evaluate `assert_eq!` between the return value of the target function and
+///   the (possibly converted) expected value.
+#[macro_export]
 macro_rules! param_test {
     (
         $test_fn:ident < $target_fn:path > (
-            $($param:ident : $paramty:ty $($paraminto:block)?),* $(,)?
-        ) -> $retty:ty {
+            $($param:ident : $paramty:ty $(=> $paraminto:expr)?),* $(,)?
+        ) -> $expectty:ty $(=> |$expect:ident| $expectinto:block)? {
             $(
-                $case:ident($($arg:expr),* $(,)?) => $expect:expr
+                $case:ident($($arg:expr),* $(,)?) => $expectval:expr
             ),* $(,)?
         }
     ) => {
-        fn $test_fn($($param: $paramty),* , expect: $retty) {
+        fn $test_fn($($param: $paramty),* , expect: $expectty) {
             $(
                 $(let $param = $paraminto;)?
             )*
+            let res = $target_fn(
+                $($param.into()),*
+            );
+            $(let expect = (|$expect: $expectty| $expectinto)(expect);)?
             assert_eq!(
-                $target_fn(
-                    $(
-                        ($param).into()
-                    ),*
-                ),
+                res,
                 expect,
             );
         }
@@ -70,7 +101,7 @@ macro_rules! param_test {
         $(
             #[test]
             fn $case() {
-                $test_fn($($arg),*, $expect);
+                $test_fn($($arg),*, $expectval);
             }
         )*
     };

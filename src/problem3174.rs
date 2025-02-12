@@ -1,7 +1,7 @@
-//! 3174. Clear Digits
+//! Clear Digits
 //!
 //! Solved on 2025-02-09
-//! https://leetcode.com/problems/clear-digits/
+//! <https://leetcode.com/problems/clear-digits>
 
 pub struct Solution;
 impl Solution {
