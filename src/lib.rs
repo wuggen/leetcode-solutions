@@ -109,6 +109,7 @@ macro_rules! param_test {
 
 pub mod problem1910;
 pub mod problem2342;
+pub mod problem2364;
 pub mod problem2430;
 pub mod problem3066;
 pub mod problem3151;
